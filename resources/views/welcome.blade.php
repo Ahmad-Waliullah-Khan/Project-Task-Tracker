@@ -55,7 +55,7 @@
 
         <div class="container">
 
-        @if (count($tasks) > 0)
+
         <div class="panel panel-default">
             <div class="panel-heading">
                 Tasks Logged
@@ -92,7 +92,11 @@
                                 </td>
 
                                 <td>
+                                  @if (isset($task->log))
                                     {{ $task->log->time_logged }}
+                                  @else
+                                    No Time Logged
+                                  @endif
                                 </td>
                             </tr>
                         @endforeach
@@ -100,6 +104,5 @@
                 </table>
             </div>
         </div>
-    @endif
   </div>
 @endsection

@@ -26,6 +26,7 @@ use Illuminate\Http\Request;
          ->first();
     $tasks = Task::orderBy('updated_at', 'desc')->get();
 
+
      return view('welcome', [
          'log' => $log,
          'tasks' => $tasks,
@@ -90,7 +91,14 @@ Route::post('/log', function (Request $request) {
     $completed_on = Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $log->completed_on);
     $started_on = Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $log->started_on);
 
-    $log->time_logged = $completed_on->diffInMinutes($started_on);
+    $time_difference = $completed_on->diffInSeconds($started_on);
+
+    $time_difference = Carbon\Carbon::parse($time_difference)->addSeconds($time_difference);
+
+    $log->time_logged = $time_difference;
+
+    $log->completed_on = null;
+    $log->started_on = null;
 
     $log->save();
 
@@ -106,9 +114,7 @@ Route::post('/log', function (Request $request) {
       if ($log == null) {
         $log = new Log;
         $log->started_on = Carbon\Carbon::now();
-        $log->completed_on = Carbon\Carbon::now();
         $log->task_id = $request->input('task');
-        $log->time_logged = 0;
         $log->save();
       } else {
         $log->started_on = Carbon\Carbon::now();

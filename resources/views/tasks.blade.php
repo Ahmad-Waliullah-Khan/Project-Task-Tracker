@@ -49,6 +49,7 @@
             <!-- Table Headings -->
             <thead>
                 <th>Task</th>
+                <th>Project</th>
                 <th>Time Logged</th>
             </thead>
 
@@ -62,7 +63,15 @@
                         </td>
 
                         <td>
+                          
+                        </td>
+
+                        <td>
+                          @if (isset($task->log))
                             {{ $task->log->time_logged }}
+                          @else
+                            No Time Logged
+                          @endif
                         </td>
                     </tr>
                 @endforeach

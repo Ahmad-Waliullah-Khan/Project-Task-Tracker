@@ -10,4 +10,9 @@ class Task extends Model
   {
       return $this->hasOne('App\Log');
   }
+
+  public function project()
+  {
+      return $this->belongsTo('App\Project');
+  }
 }
