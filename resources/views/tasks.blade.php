@@ -62,7 +62,7 @@
                         </td>
 
                         <td>
-                            <!-- TODO: Show logged time -->
+                            {{ $task->log->time_logged }}
                         </td>
                     </tr>
                 @endforeach

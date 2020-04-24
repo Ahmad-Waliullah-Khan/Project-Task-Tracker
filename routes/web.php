@@ -15,17 +15,20 @@ use Illuminate\Support\Facades\Route;
 
 use App\Task;
 use App\Project;
-use App\Timer;
+use App\Log;
 use Illuminate\Http\Request;
 
 /**
  * Dashboard
  */
  Route::get('/', function () {
-     $tasks = Task::orderBy('created_at', 'desc')->get();
+    $log = Log::where('task_id', '=', 0)
+         ->first();
+    $tasks = Task::orderBy('updated_at', 'desc')->get();
 
      return view('welcome', [
-         'tasks' => $tasks
+         'log' => $log,
+         'tasks' => $tasks,
      ]);
  });
 
@@ -73,12 +76,48 @@ Route::post('/task', function (Request $request) {
 
 Route::post('/log', function (Request $request) {
 
-  session(['task_being_tracked' => $request->input('task')]);
+  if (session('task_being_tracked') !=null) {
 
-   $timer = new Timer;
-   $timer->started_on = Carbon\Carbon::now();
-   // $timer->task_id = $request->input('task')
-   $timer->save();
+    $log = Log::where('task_id', '=', session('task_being_tracked'))
+        ->first();
+
+    $log->completed_on = Carbon\Carbon::now();
+    $log->save();
+
+    $log = Log::where('task_id', '=', session('task_being_tracked'))
+        ->first();
+
+    $completed_on = Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $log->completed_on);
+    $started_on = Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $log->started_on);
+
+    $log->time_logged = $completed_on->diffInMinutes($started_on);
+
+    $log->save();
+
+    session(['task_being_tracked' => null]);
+
+    }
+    else {
+      session(['task_being_tracked' => $request->input('task')]);
+
+      $log = Log::where('task_id', '=', $request->input('task'))
+          ->first();
+
+      if ($log == null) {
+        $log = new Log;
+        $log->started_on = Carbon\Carbon::now();
+        $log->completed_on = Carbon\Carbon::now();
+        $log->task_id = $request->input('task');
+        $log->time_logged = 0;
+        $log->save();
+      } else {
+        $log->started_on = Carbon\Carbon::now();
+        $log->save();
+      }
+
+  }
+
+   return redirect('/');
 });
 
 /**
